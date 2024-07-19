@@ -140,7 +140,7 @@
                         [loadingAlert
                             dismissViewControllerAnimated:YES
                                                completion:^{
-                                                 UIAlertController *completionAlert = [UIAlertController alertControllerWithTitle: @"DuplicationComplete!"
+                                                 UIAlertController *completionAlert = [UIAlertController alertControllerWithTitle: @"Duplication Complete!"
                                                               message:[NSString stringWithFormat: @"IPA file saved " @"to:\n%@", ipa]
                                                                preferredStyle: UIAlertControllerStyleAlert];
                                                  [completionAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
