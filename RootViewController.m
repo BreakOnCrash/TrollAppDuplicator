@@ -94,16 +94,25 @@
     UIAlertController *alert;
     NSDictionary *app = self.apps[indexPath.row];
     alert = [UIAlertController alertControllerWithTitle:@"Duplicate" 
-                message:[NSString stringWithFormat:@"Duplicate %@?", app[@"name"]]
+                message:[NSString stringWithFormat:@"Duplicate %@?\n"
+                                                    @"Enter the name of the application here", app[@"name"]]
                 preferredStyle:UIAlertControllerStyleAlert];
+    // 输入分身应用的名称
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.text = app[@"name"];
+    }];
     UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
     UIAlertAction *duplicate = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        // 获取分身应用的名称
+        UITextField *textField = alert.textFields.firstObject;
+        NSString *appName = textField.text;
+
         UIAlertController *loadingAlert = [UIAlertController alertControllerWithTitle:@"Duplicating" 
             message:@"Please wait, this will take a few seconds..." 
             preferredStyle:UIAlertControllerStyleAlert];
         [self presentViewController:loadingAlert animated:YES completion:nil];
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSString *ipa = [self.duplicator duplicateAppWithBundleID:app[@"path"] bundleID:app[@"bundleID"] name:app[@"name"]];
+            NSString *ipa = [self.duplicator duplicateAppWithBundleID:app[@"path"] bundleID:app[@"bundleID"] name:appName];
             // 切换回主线程更新 UI
             dispatch_async(dispatch_get_main_queue(), ^{
                 [loadingAlert dismissViewControllerAnimated:YES completion:^{
