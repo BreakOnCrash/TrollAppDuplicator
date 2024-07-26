@@ -1,6 +1,6 @@
 ARCHS = arm64
 
-TARGET := iphone:clang:latest:14.0
+TARGET := iphone:clang:latest:latest
 INSTALL_TARGET_PROCESSES = TrollAppDuplicator
 
 include $(THEOS)/makefiles/common.mk
