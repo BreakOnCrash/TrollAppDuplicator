@@ -1,6 +1,10 @@
 # TrollAppDuplicator
 iOS App duplicator for TrollStore
 
+[now-on-havoc]: https://havoc.app/package/appduplicator 
+
+[<img width="150" src="https://docs.havoc.app/img/badges/get_square.svg" />][now-on-havoc]
+
 ## Preview
 
 <img width="30%" src="./docs/preview1.PNG"><img width="30%" src="./docs/preview2.PNG"><img width="30%" src="./docs/preview3.PNG">
