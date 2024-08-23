@@ -9,7 +9,11 @@
     self.title = @"Duplicated IPAs";
     self.fileList = duplicatedFileList();
 
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(done)];
+    self.navigationItem.rightBarButtonItem =
+        [[UIBarButtonItem alloc] initWithTitle:@"Done"
+                                         style:UIBarButtonItemStyleDone
+                                        target:self
+                                        action:@selector(done)];
 }
 
 - (void)refresh {
@@ -29,22 +33,24 @@
     return self.fileList.count;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (UITableViewCell *)tableView:(UITableView *)tableView
+         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *cellIdentifier = @"FileCell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
 
     if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellIdentifier];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
+                                      reuseIdentifier:cellIdentifier];
     }
 
     NSString *path = [docPath() stringByAppendingPathComponent:self.fileList[indexPath.row]];
-    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil];
+    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path
+                                                                                error:nil];
     NSDate *date = attributes[NSFileModificationDate];
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"MMM d, yyyy h:mm a"];
 
     NSNumber *fileSize = attributes[NSFileSize];
-
 
     cell.textLabel.text = self.fileList[indexPath.row];
     cell.detailTextLabel.text = [dateFormatter stringFromDate:date];
@@ -59,7 +65,6 @@
     label.textAlignment = NSTextAlignmentCenter;
     cell.accessoryView = label;
 
-
     return cell;
 }
 
@@ -71,15 +76,21 @@
     return YES;
 }
 
-- (UISwipeActionsConfiguration *)tableView:(UITableView *)tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UIContextualAction *deleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"Delete" handler:^(UIContextualAction *action, UIView *sourceView, void (^completionHandler)(BOOL)) {
-        NSString *file = self.fileList[indexPath.row];
-        NSString *path = [docPath() stringByAppendingPathComponent:file];
-        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
-        [self refresh];
-    }];
+- (UISwipeActionsConfiguration *)tableView:(UITableView *)tableView
+    trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UIContextualAction *deleteAction = [UIContextualAction
+        contextualActionWithStyle:UIContextualActionStyleDestructive
+                            title:@"Delete"
+                          handler:^(UIContextualAction *action, UIView *sourceView,
+                                    void (^completionHandler)(BOOL)) {
+                            NSString *file = self.fileList[indexPath.row];
+                            NSString *path = [docPath() stringByAppendingPathComponent:file];
+                            [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+                            [self refresh];
+                          }];
 
-    UISwipeActionsConfiguration *swipeActions = [UISwipeActionsConfiguration configurationWithActions:@[deleteAction]];
+    UISwipeActionsConfiguration *swipeActions =
+        [UISwipeActionsConfiguration configurationWithActions:@[ deleteAction ]];
     return swipeActions;
 }
 
@@ -88,7 +99,8 @@
     NSString *path = [docPath() stringByAppendingPathComponent:file];
     NSURL *url = [NSURL fileURLWithPath:path];
 
-    UIActivityViewController *activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:nil];
+    UIActivityViewController *activityViewController =
+        [[UIActivityViewController alloc] initWithActivityItems:@[ url ] applicationActivities:nil];
     [self presentViewController:activityViewController animated:YES completion:nil];
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];

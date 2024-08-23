@@ -80,6 +80,25 @@
         [UIImage _applicationIconImageForBundleIdentifier:app[@"bundleID"]
                                                    format:iconFormat()
                                                     scale:[UIScreen mainScreen].scale];
+    UILabel *tag = [[UILabel alloc] initWithFrame:CGRectMake(0, 0,50, 20)];
+    tag.textColor = [UIColor whiteColor];
+    tag.textAlignment = NSTextAlignmentCenter;
+    tag.font = [UIFont systemFontOfSize:8];
+    tag.layer.cornerRadius = 10;
+    tag.layer.masksToBounds = YES;
+    
+    
+    if ([[app objectForKey:@"encrypted"] boolValue]){
+        tag.text = @"encrypted";
+        tag.textColor = [UIColor whiteColor];
+        tag.backgroundColor = [UIColor redColor]; // 设置背景颜色
+    }else{
+        tag.text = @"decrypted";
+        tag.textColor = [UIColor blackColor];
+        tag.backgroundColor = [UIColor greenColor]; // 设置背景颜色
+    }
+    
+    cell.accessoryView = tag;
 
     return cell;
 }
@@ -93,40 +112,48 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     UIAlertController *alert;
     NSDictionary *app = self.apps[indexPath.row];
-    alert = [UIAlertController alertControllerWithTitle:@"Duplicate" 
-                message:[NSString stringWithFormat:@"Duplicate %@?\n"
+    
+    if ([[app objectForKey:@"encrypted"] boolValue]){
+        alert = [UIAlertController alertControllerWithTitle:@"Warning" 
+                                    message:[NSString stringWithFormat:@"The app must be decrypted first."]
+                                    preferredStyle:UIAlertControllerStyleAlert];
+    }else{
+        alert = [UIAlertController alertControllerWithTitle:@"Duplicate" 
+                                    message:[NSString stringWithFormat:@"Duplicate %@?\n"
                                                     @"Enter the name of the application here", app[@"name"]]
-                preferredStyle:UIAlertControllerStyleAlert];
-    // 输入分身应用的名称
-    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.text = app[@"name"];
-    }];
-    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
-    UIAlertAction *duplicate = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-        // 获取分身应用的名称
-        UITextField *textField = alert.textFields.firstObject;
-        NSString *appName = textField.text;
+                                    preferredStyle:UIAlertControllerStyleAlert];
+        // 输入分身应用的名称
+        [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+            textField.text = app[@"name"];
+        }];
+        
+        UIAlertAction *duplicate = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            // 获取分身应用的名称
+            NSString *appName = alert.textFields.firstObject.text;
 
-        UIAlertController *loadingAlert = [UIAlertController alertControllerWithTitle:@"Duplicating" 
-            message:@"Please wait, this will take a few seconds..." 
-            preferredStyle:UIAlertControllerStyleAlert];
-        [self presentViewController:loadingAlert animated:YES completion:nil];
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSString *ipa = [self.duplicator duplicateAppWithBundleID:app[@"path"] bundleID:app[@"bundleID"] name:appName];
-            // 切换回主线程更新 UI
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [loadingAlert dismissViewControllerAnimated:YES completion:^{
-                    UIAlertController *completionAlert = [UIAlertController alertControllerWithTitle: @"Duplication Complete!"
-                                                            message:[NSString stringWithFormat: @"IPA file saved " @"to:\n%@", ipa]
-                                                            preferredStyle: UIAlertControllerStyleAlert];
-                    [completionAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-                    [self presentViewController: completionAlert animated:YES completion:nil];
-                }];
+            UIAlertController *loadingAlert = [UIAlertController alertControllerWithTitle:@"Duplicating" 
+                                                                    message:@"Please wait, this will take a few seconds..." 
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            [self presentViewController:loadingAlert animated:YES completion:nil];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                NSString *ipa = [self.duplicator duplicateAppWithBundleID:app[@"path"] bundleID:app[@"bundleID"] name:appName];
+                // 切换回主线程更新 UI
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [loadingAlert dismissViewControllerAnimated:YES completion:^{
+                        UIAlertController *completionAlert = [UIAlertController alertControllerWithTitle: @"Duplication Complete!"
+                                                                                message:[NSString stringWithFormat: @"IPA file saved " @"to:\n%@", ipa]
+                                                                                preferredStyle: UIAlertControllerStyleAlert];
+                        [completionAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+                        [self presentViewController: completionAlert animated:YES completion:nil];
+                    }];
+                });
             });
-        });
-    }];
+        }];
+    
+        [alert addAction:duplicate];
+    }
 
-    [alert addAction:duplicate];
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
     [alert addAction:cancel];
 
     [self presentViewController:alert animated:YES completion:nil];
