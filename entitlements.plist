@@ -12,29 +12,7 @@
 	</array>
 	<key>com.apple.private.security.no-sandbox</key>
 	<true/>
-	<key>com.apple.private.persona-mgmt</key>
-	<true/>
-	<key>com.apple.private.MobileContainerManager.allowed</key>
-	<true/>
-	<key>com.apple.private.security.container-manager</key>
-	<true/>
 	<key>com.apple.private.security.storage.AppBundles</key>
 	<true/>
-	<key>com.apple.private.security.storage.AppDataContainers</key>
-	<true/>
-	<key>com.apple.springboard.launchapplications</key>
-	<true/>
-	<key>com.apple.security.exception.iokit-user-client-class</key>
-	<array>
-		<string>IOUserClient</string>
-		<string>IOUserServer</string>
-		<string>RootDomainUserClient</string>
-	</array>
-	<key>com.apple.security.iokit-user-client-class</key>
-	<array>
-		<string>IOUserClient</string>
-		<string>IOUserServer</string>
-		<string>RootDomainUserClient</string>
-	</array>
 </dict>
 </plist>
