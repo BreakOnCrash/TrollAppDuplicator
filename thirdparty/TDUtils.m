@@ -4,58 +4,6 @@
 #import <mach-o/loader.h>
 #import "LSApplicationProxy+AltList.h"
 
-NSArray *appList(void) {
-    NSMutableArray *apps = [NSMutableArray array];
-
-    NSArray<LSApplicationProxy *> *installedApplications =
-        [[LSApplicationWorkspace defaultWorkspace] atl_allInstalledApplications];
-    [installedApplications enumerateObjectsUsingBlock:^(LSApplicationProxy *proxy, NSUInteger idx,
-                                                        BOOL *stop) {
-      if ([proxy atl_isHidden]) return;
-
-      NSString *bundleID = bundleID = [proxy atl_bundleIdentifier];
-
-      if (![proxy.applicationType isEqualToString:@"User"]) {
-          if ([bundleID hasPrefix:@"com.apple."]) return;   // system App
-          if ([bundleID hasPrefix:@"com.opa334."]) return;  // some like trollstore App
-          if ([bundleID isEqualToString:@"com.zznq.trollappduplicator"]) return;  // Self
-      }
-
-      NSURL *appURL = [proxy performSelector:@selector(bundleURL)];
-      if (![appURL.path hasPrefix:@"/private/var/containers/Bundle/Application/"]) return;
-
-      NSMutableDictionary *infoPlist = [NSMutableDictionary
-          dictionaryWithContentsOfFile:[appURL.path stringByAppendingPathComponent:@"Info.plist"]];
-      if (!infoPlist || !infoPlist[@"CFBundleExecutable"]) return;
-
-      NSString *path = appURL.path;
-      NSString *name = [proxy atl_nameToDisplay];
-      NSString *version = [proxy atl_shortVersionString];
-
-      if (!bundleID || !name || !version || !path) return;
-
-      NSDictionary *item = @{
-          @"bundleID" : bundleID,
-          @"name" : name,
-          @"path" : path,
-          @"version" : version,
-          @"encrypted" : [NSNumber
-              numberWithBool:isBinaryEncrypted([path stringByAppendingPathComponent:
-                                                         infoPlist[@"CFBundleExecutable"]])]
-      };
-
-      [apps addObject:item];
-    }];
-
-    NSSortDescriptor *descriptor =
-        [[NSSortDescriptor alloc] initWithKey:@"name"
-                                    ascending:YES
-                                     selector:@selector(localizedCaseInsensitiveCompare:)];
-    [apps sortUsingDescriptors:@[ descriptor ]];
-
-    return [apps copy];
-}
-
 NSUInteger iconFormat(void) {
     return (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 8 : 10;
 }
@@ -136,7 +84,9 @@ BOOL isArchitectureEncrypted(FILE *binary, uint32_t offset) {
     }
 
     struct load_command lc;
-    for (uint32_t i = 0; i < (is64Bit ? ((struct mach_header_64 *)(&magic))->ncmds:((struct mach_header *)(&magic))->ncmds);i++) {
+    for (uint32_t i = 0; i < (is64Bit ? ((struct mach_header_64 *)(&magic))->ncmds
+                                      : ((struct mach_header *)(&magic))->ncmds);
+         i++) {
         fread(&lc, sizeof(struct load_command), 1, binary);
 
         if (lc.cmd == LC_ENCRYPTION_INFO_64 && is64Bit) {
